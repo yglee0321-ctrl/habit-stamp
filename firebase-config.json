@@ -1,8 +1,8 @@
 {
-  "apiKey": "PASTE_HERE",
-  "authDomain": "PASTE_HERE",
-  "projectId": "PASTE_HERE",
-  "storageBucket": "PASTE_HERE",
-  "messagingSenderId": "PASTE_HERE",
-  "appId": "PASTE_HERE"
+  "apiKey": "AIzaSyCd0hV60-Rp7hSZy1rMPqKjH4PRoyFeBLU",
+  "authDomain": "habit-tracker-87fcd.firebaseapp.com",
+  "projectId": "habit-tracker-87fcd",
+  "storageBucket": "habit-tracker-87fcd.firebasestorage.app",
+  "messagingSenderId": "717448260247",
+  "appId": "1:717448260247:web:2346fbf359271598e6d7d2"
 }
