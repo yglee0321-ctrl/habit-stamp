@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 각 사용자의 기록: 로그인한 본인만 읽고 쓸 수 있음
+    match /users/{uid}/data/{docId} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null
+        && request.auth.uid == uid
+        && (docId in ['habits', 'categories', 'settings'] || docId.matches('logs-[0-9]{4}-[0-9]{2}'))
+        && request.resource.data.keys().hasOnly(['items', 'theme', 'language']);
+    }
+    // 그 밖의 모든 경로는 아무도 접근할 수 없음
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

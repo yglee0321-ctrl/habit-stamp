@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-serif: "Gowun Batang", "Noto Serif KR", "Batang", serif;
+  --font-sans: "Pretendard Variable", Pretendard, "Noto Sans KR", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --color-seal-red: #C23B22;
+  --color-seal-dark: #8F220F;
+  --color-hanji-bg: #F8F5EE;
+  --color-hanji-card: #FCFAF6;
+  --color-hanji-border: #E8E2D5;
+  --color-ink-dark: #121110;
+  --color-ink-card: #1C1A18;
+  --color-ink-border: #2C2824;
+}
+
+/* Hanji paper subtle fiber texture and typography */
+.font-batang {
+  font-family: "Gowun Batang", "Noto Serif KR", Georgia, serif;
+}
+
+.font-serif-kr {
+  font-family: "Noto Serif KR", "Gowun Batang", serif;
+}
+
+/* Stamp press animation */
+@keyframes stamp-slam {
+  0% {
+    transform: scale(2.2) rotate(-15deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(0.92) rotate(2deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.animate-stamp {
+  animation: stamp-slam 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Traditional Stamp seal visual style */
+.stamp-seal {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #C23B22;
+  border-radius: 8px;
+  color: #C23B22;
+  font-family: "Noto Serif KR", "Gowun Batang", serif;
+  font-weight: 700;
+  text-shadow: 0 0 1px rgba(194, 59, 34, 0.4);
+  box-shadow: inset 0 0 4px rgba(194, 59, 34, 0.15);
+}
+
+.stamp-seal-circle {
+  border-radius: 9999px;
+}
+
+/* Base body background */
+html, body {
+  background-color: #F8F5EE;
+  color: #2C2723;
+}
+
+html.dark, html.dark body {
+  background-color: #121110;
+  color: #E6E1DA;
+}
+
+/* Custom scrollbar styled like sumi ink */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(140, 130, 120, 0.3);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(194, 59, 34, 0.5);
+}
+
+/* Hide scrollbars on mobile swipe containers */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Safe area insets for notched mobile devices */
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+
