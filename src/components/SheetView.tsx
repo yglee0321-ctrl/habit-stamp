@@ -467,7 +467,8 @@ export const SheetView: React.FC<SheetViewProps> = ({ habits, logs, currentDate,
                       const scheduled = isHabitScheduledOnDate(h, d);
                       const target = h.targetCount || 1;
                       const partial = !h.trackOnly && !done && (log?.currentCount || 0) > 0;
-                      const bg = done
+                      const written = !!h.trackOnly && !!log?.notes; // 기록만 항목: 글을 적은 날은 달성처럼 칠함
+                      const bg = done || written
                         ? 'bg-orange-400 dark:bg-orange-600 text-[#3A1D08] dark:text-white'
                         : partial
                         ? 'bg-orange-200 dark:bg-orange-900 text-[#3A1D08] dark:text-orange-100'
