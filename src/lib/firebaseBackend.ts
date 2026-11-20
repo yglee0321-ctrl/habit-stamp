@@ -59,7 +59,14 @@ export function startFirebase() {
       },
       (err) => {
         console.warn(err);
-        setBackendError('기록을 불러오지 못했어요. 다시 로그인해 주세요.');
+        const code = (err as any)?.code || 'unknown';
+        const hint =
+          code === 'permission-denied'
+            ? '접근 권한이 없어요. (Firestore 보안 규칙 확인 필요)'
+            : code === 'unavailable'
+            ? '저장 서버에 연결하지 못했어요. 학교·회사 와이파이가 막고 있을 수 있어요.'
+            : '기록을 불러오지 못했어요. 다시 로그인해 주세요.';
+        setBackendError(`${hint} [firestore/${code}]`);
       }
     );
   });
@@ -76,10 +83,15 @@ export async function signInWithGoogle(sharedComputer: boolean): Promise<string 
   } catch (e: any) {
     const code = e?.code || '';
     if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return null;
-    if (code === 'auth/popup-blocked') return '로그인 창이 차단됐어요. 브라우저에서 팝업을 허용한 뒤 다시 눌러 주세요.';
-    if (code === 'auth/unauthorized-domain') return '이 주소는 아직 로그인이 허용되지 않았어요. (Firebase 승인된 도메인 설정 필요)';
-    if (code === 'auth/network-request-failed') return '인터넷 연결을 확인해 주세요.';
-    return '로그인하지 못했어요. 잠시 후 다시 시도해 주세요.';
+    const tag = code ? ` [${code}]` : '';
+    if (code === 'auth/popup-blocked') return '로그인 창이 차단됐어요. 브라우저에서 팝업을 허용한 뒤 다시 눌러 주세요.' + tag;
+    if (code === 'auth/unauthorized-domain') return '이 주소는 아직 로그인이 허용되지 않았어요. (Firebase 승인된 도메인 설정 필요)' + tag;
+    if (code === 'auth/network-request-failed')
+      return '로그인 서버에 연결하지 못했어요. 학교·회사 와이파이가 구글 로그인을 막고 있을 수 있어요. 휴대폰 데이터나 다른 와이파이로 다시 해 보세요.' + tag;
+    if (code === 'auth/operation-not-allowed') return '구글 로그인이 아직 켜져 있지 않아요. (Firebase Authentication 설정 필요)' + tag;
+    if (code.startsWith('auth/requests-from-referer')) return '이 주소에서는 로그인이 허용되지 않았어요. (API 키 사용처 제한 확인 필요)' + tag;
+    if (code === 'auth/web-storage-unsupported') return '이 브라우저에서는 로그인할 수 없어요. 크롬이나 사파리로 열어 주세요.' + tag;
+    return '로그인하지 못했어요. 잠시 후 다시 시도해 주세요.' + (tag || ` [${String(e?.message || 'unknown').slice(0, 80)}]`);
   }
 }
 
@@ -100,9 +112,11 @@ export async function uploadCsvAsSheet(title: string, csv: string): Promise<{ ok
     const res = await reauthenticateWithPopup(user, provider);
     token = GoogleAuthProvider.credentialFromResult(res)?.accessToken;
   } catch (e: any) {
-    if (e?.code === 'auth/popup-closed-by-user') return { ok: false, message: '구글 드라이브 권한을 허용해야 시트를 만들 수 있어요.' };
-    if (e?.code === 'auth/popup-blocked') return { ok: false, message: '권한 창이 차단됐어요. 팝업을 허용한 뒤 다시 눌러 주세요.' };
-    return { ok: false, message: '구글 드라이브 권한을 받지 못했어요.' };
+    const tag = e?.code ? ` [${e.code}]` : '';
+    if (e?.code === 'auth/popup-closed-by-user') return { ok: false, message: '구글 드라이브 권한을 허용해야 시트를 만들 수 있어요.' + tag };
+    if (e?.code === 'auth/popup-blocked') return { ok: false, message: '권한 창이 차단됐어요. 팝업을 허용한 뒤 다시 눌러 주세요.' + tag };
+    if (e?.code === 'auth/network-request-failed') return { ok: false, message: '구글 서버에 연결하지 못했어요. 다른 네트워크에서 다시 해 보세요.' + tag };
+    return { ok: false, message: '구글 드라이브 권한을 받지 못했어요.' + tag };
   }
   if (!token) return { ok: false, message: '구글 드라이브 권한을 받지 못했어요.' };
 
@@ -117,10 +131,16 @@ export async function uploadCsvAsSheet(title: string, csv: string): Promise<{ ok
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': `multipart/related; boundary=${boundary}` },
       body,
     });
-    if (!r.ok) return { ok: false, message: `구글 드라이브가 파일을 만들지 못했어요. (${r.status})` };
+    if (!r.ok) {
+      let reason = '';
+      try {
+        reason = (await r.json())?.error?.message || '';
+      } catch {}
+      return { ok: false, message: `구글 드라이브가 파일을 만들지 못했어요. [HTTP ${r.status}${reason ? ' ' + reason.slice(0, 80) : ''}]` };
+    }
     const j = await r.json();
     return { ok: true, url: j.webViewLink || `https://docs.google.com/spreadsheets/d/${j.id}/edit` };
-  } catch {
-    return { ok: false, message: '인터넷 연결을 확인해 주세요.' };
+  } catch (e: any) {
+    return { ok: false, message: `구글 드라이브에 연결하지 못했어요. 다른 네트워크에서 다시 해 보세요. [${String(e?.message || 'network').slice(0, 60)}]` };
   }
 }

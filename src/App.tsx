@@ -24,19 +24,15 @@ import { format } from 'date-fns';
 
 type Tab = 'insights' | 'report' | 'sheet' | 'categories';
 
-// 사용자의 구글 시트 항목으로 만든 시작 세트
+// 처음 쓰는 사람을 위한 일반 추천 세트 (나중에 자유롭게 고치거나 지울 수 있음)
 const STARTER_HABITS: Partial<Habit>[] = [
   { title: '기상시간', description: '일어난 시각을 적어 두기', categoryId: 'routine', stampText: '起', icon: 'Sunrise', color: 'cyan', timeOfDay: 'morning', trackOnly: true },
-  { title: '일본어공부', description: '공부한 범위를 적어 두기', categoryId: 'learning', stampText: '日', icon: 'BookOpen', color: 'sky' },
-  { title: '화학공부', description: '공부한 범위를 적어 두기 (예: 6-2)', categoryId: 'learning', stampText: '化', icon: 'BookOpen', color: 'indigo' },
-  { title: '액츄에이터 프로젝트', categoryId: 'productivity', stampText: '械', icon: 'Briefcase', color: 'amber' },
-  { title: '개인 프로젝트', categoryId: 'productivity', stampText: '作', icon: 'Sparkles', color: 'violet' },
-  { title: '뉴스/관심사 탐구', categoryId: 'learning', stampText: '聞', icon: 'BookOpen', color: 'teal' },
-  { title: '요리/식단', categoryId: 'routine', stampText: '食', icon: 'Coffee', color: 'amber' },
-  { title: '게임', categoryId: 'hobby', stampText: '遊', icon: 'Trophy', color: 'rose' },
-  { title: '여가', categoryId: 'mindfulness', stampText: '休', icon: 'Moon', color: 'violet' },
-  { title: '운동', categoryId: 'health', stampText: '動', icon: 'Activity', color: 'emerald' },
-  { title: '기타', categoryId: 'hobby', stampText: '他', icon: 'Sparkles', color: 'rose' },
+  { title: '운동', description: '30분 이상 몸 움직이기', categoryId: 'health', stampText: '動', icon: 'Activity', color: 'emerald' },
+  { title: '독서', description: '10쪽 이상 읽기', categoryId: 'learning', stampText: '讀', icon: 'BookOpen', color: 'indigo' },
+  { title: '공부', description: '오늘 공부한 범위를 적어 두기', categoryId: 'learning', stampText: '學', icon: 'GraduationCap', color: 'sky' },
+  { title: '물 마시기', description: '물 8잔', categoryId: 'health', stampText: '水', icon: 'Droplets', color: 'teal' },
+  { title: '일찍 자기', description: '자정 전에 잠들기', categoryId: 'routine', stampText: '眠', icon: 'Moon', color: 'violet', timeOfDay: 'evening' },
+  { title: '오늘의 한 줄', description: '하루를 한 줄로 남기기', categoryId: 'mindfulness', stampText: '記', icon: 'PenLine', color: 'rose', trackOnly: true },
 ];
 
 function useCloud() {
@@ -155,15 +151,26 @@ function HabitTrackerApp() {
           <div className="mb-5 p-5 rounded-3xl border border-dashed border-[#C23B22]/40 bg-[#C23B22]/[0.04] font-serif-kr">
             <div className="text-sm font-bold font-batang text-[#2C2723] dark:text-[#E6E1DA] mb-1">처음 오셨네요</div>
             <p className="text-xs text-[#7A7265] dark:text-[#A89F91] mb-3 leading-relaxed">
-              구글 시트에 쓰던 항목(기상시간, 일본어공부, 화학공부, 액츄에이터 프로젝트, 개인 프로젝트, 뉴스/관심사 탐구, 요리/식단, 게임, 여가, 운동, 기타)으로 바로 시작할 수 있어요. 나중에 자유롭게 고치거나 지울 수 있어요.
+              추천 항목({STARTER_HABITS.map((h) => h.title).join(', ')})으로 바로 시작하거나, 원하는 항목을 직접 만들 수 있어요. 어느 쪽이든 나중에 자유롭게 고치거나 지울 수 있어요.
             </p>
-            <button onClick={handleUseStarter} className="px-4 py-2.5 rounded-xl bg-[#C23B22] hover:bg-[#A82E18] text-white text-xs font-bold">
-              시트 항목으로 시작하기
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button onClick={handleUseStarter} className="px-4 py-2.5 rounded-xl bg-[#C23B22] hover:bg-[#A82E18] text-white text-xs font-bold">
+                추천 항목으로 시작하기
+              </button>
+              <button
+                onClick={() => {
+                  setEditingHabit(null);
+                  setIsHabitModalOpen(true);
+                }}
+                className="px-4 py-2.5 rounded-xl border border-[#E2DBD0] dark:border-[#38332C] text-[#5C5549] dark:text-[#C5BEB3] hover:bg-[#F3EFE6] dark:hover:bg-[#25221F] text-xs font-bold"
+              >
+                직접 만들기
+              </button>
+            </div>
           </div>
         )}
 
-        {activeTab === 'sheet' && (
+        {activeTab === 'sheet' && habits.length > 0 && (
           <SheetView
             habits={habits}
             logs={logs}

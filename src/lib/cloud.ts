@@ -112,10 +112,13 @@ async function flush(docId: string) {
 
 function reportWriteError(e: any) {
   console.warn('db write failed', e);
+  const code = e?.code || 'unknown';
   state.errorMessage =
-    e?.code === 'quota_exceeded'
+    (code === 'quota_exceeded' || code === 'resource-exhausted'
       ? '저장 공간이 가득 찼어요. 오래된 기록을 정리해야 해요.'
-      : '저장에 실패했어요. 잠시 후 다시 시도해 주세요.';
+      : code === 'permission-denied'
+      ? '저장 권한이 없어요. 다시 로그인해 주세요.'
+      : '저장에 실패했어요. 잠시 후 다시 시도해 주세요.') + ` [저장/${code}]`;
   emit();
 }
 
