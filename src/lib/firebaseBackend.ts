@@ -62,11 +62,6 @@ export function startFirebase() {
       (err) => {
         console.warn(err);
         const code = (err as any)?.code || 'unknown';
-        if (code === 'permission-denied') {
-          // 허용 명단에 없는 계정
-          setAuth('notInvited', { name: user.displayName || '', email: user.email || '' });
-          return;
-        }
         const hint =
           code === 'permission-denied'
             ? '접근 권한이 없어요. (Firestore 보안 규칙 확인 필요)'

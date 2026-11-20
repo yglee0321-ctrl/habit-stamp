@@ -64,7 +64,6 @@ export const LoginScreen: React.FC = () => {
             <li>기록은 내 계정 전용 공간에 저장되고, 다른 사용자는 볼 수 없어요.</li>
             <li>기록은 미국에 있는 구글(Firebase) 서버에 저장돼요.</li>
             <li>이 앱을 운영하는 사람(yungyulee)은 관리 화면에서 저장된 기록에 접근할 수 있어요. 문의: yglee0321@gmail.com</li>
-            <li>초대받은 사람만 쓸 수 있는 개인용 앱이에요.</li>
             <li>기기에는 기록을 남기지 않아요. 계정 메뉴에서 언제든 탈퇴하고 모든 기록을 지울 수 있어요.</li>
           </ul>
         </div>
@@ -202,43 +201,6 @@ const LeaveDialog: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </>
         )}
       </div>
-    </div>
-  );
-};
-
-// 허용 명단에 없는 계정으로 로그인했을 때
-export const NotInvitedScreen: React.FC = () => {
-  const acc = cloud.getState().account;
-  const [leaving, setLeaving] = useState(false);
-  const logout = async () => {
-    if (import.meta.env.VITE_TARGET !== 'web') return;
-    const fb = await import('../lib/firebaseBackend');
-    await fb.logout();
-  };
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FCFAF6] dark:bg-[#121110] px-5 font-serif-kr">
-      <div className="w-full max-w-sm text-center">
-        <div className="w-14 h-14 mx-auto mb-4 rounded-2xl border-[3px] border-[#C23B22] text-[#C23B22] flex items-center justify-center text-2xl font-black rotate-[-4deg]" aria-hidden="true">
-          印
-        </div>
-        <h1 className="text-lg font-bold font-batang text-[#2C2723] dark:text-[#E6E1DA] mb-2">아직 초대되지 않은 계정이에요</h1>
-        <p className="text-xs text-[#5C5549] dark:text-[#C5BEB3] leading-relaxed mb-5">
-          습관 도장은 초대받은 사람만 쓰는 개인용 앱이에요.
-          <br />
-          <span className="font-bold">{acc?.email}</span> 로 로그인했어요.
-          <br />
-          쓰고 싶다면 운영자(yglee0321@gmail.com)에게 이 이메일을 알려 주세요.
-        </p>
-        <div className="flex flex-col gap-2">
-          <button onClick={logout} className="w-full py-3 rounded-2xl bg-[#C23B22] hover:bg-[#A82E18] text-white text-sm font-bold">
-            다른 계정으로 로그인
-          </button>
-          <button onClick={() => setLeaving(true)} className="w-full py-2.5 rounded-2xl border border-[#E2DBD0] dark:border-[#38332C] text-xs font-bold text-[#5C5549] dark:text-[#C5BEB3]">
-            이 계정 정보 삭제하기
-          </button>
-        </div>
-      </div>
-      {leaving && <LeaveDialog onClose={() => setLeaving(false)} />}
     </div>
   );
 };

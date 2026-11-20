@@ -24,7 +24,7 @@ interface State {
   logs: Map<string, HabitLog>; // key = `${date}_${habitId}`
   settings: Settings;
   uid: string | null;
-  auth: 'unknown' | 'signedOut' | 'signedIn' | 'notInvited';
+  auth: 'unknown' | 'signedOut' | 'signedIn';
   account?: { name: string; email: string };
   notice?: string;
 }

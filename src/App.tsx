@@ -19,7 +19,7 @@ import {
 } from './lib/storage';
 import * as cloud from './lib/cloud';
 import { askConfirm } from './lib/ui';
-import { LoginScreen, NotInvitedScreen } from './components/AccountUI';
+import { LoginScreen } from './components/AccountUI';
 import { format } from 'date-fns';
 
 type Tab = 'insights' | 'report' | 'sheet' | 'categories';
@@ -112,7 +112,6 @@ function HabitTrackerApp() {
     store.status === 'ready' ? '☁ 저장됨' : store.status === 'loading' ? '불러오는 중…' : store.status === 'nodb' ? '저장 안 됨' : '연결 끊김';
 
   if (store.auth === 'signedOut') return <LoginScreen />;
-  if (store.auth === 'notInvited') return <NotInvitedScreen />;
 
   if (store.auth === 'unknown' || (store.status === 'loading' && !store.habitsLoaded)) {
     return (
