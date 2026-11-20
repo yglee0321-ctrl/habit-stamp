@@ -19,7 +19,7 @@ import {
 } from './lib/storage';
 import * as cloud from './lib/cloud';
 import { askConfirm } from './lib/ui';
-import { LoginScreen } from './components/AccountUI';
+import { LoginScreen, NotInvitedScreen } from './components/AccountUI';
 import { format } from 'date-fns';
 
 type Tab = 'insights' | 'report' | 'sheet' | 'categories';
@@ -112,6 +112,7 @@ function HabitTrackerApp() {
     store.status === 'ready' ? '☁ 저장됨' : store.status === 'loading' ? '불러오는 중…' : store.status === 'nodb' ? '저장 안 됨' : '연결 끊김';
 
   if (store.auth === 'signedOut') return <LoginScreen />;
+  if (store.auth === 'notInvited') return <NotInvitedScreen />;
 
   if (store.auth === 'unknown' || (store.status === 'loading' && !store.habitsLoaded)) {
     return (
@@ -258,7 +259,7 @@ function HabitTrackerApp() {
       </main>
 
       <footer className="border-t border-[#E8E2D5] dark:border-[#2C2824] py-6 mt-8 text-center text-xs text-[#8A8174] font-serif-kr">
-        <p>습관 도장 (印) • 기록은 본인 계정에서만 볼 수 있어요</p>
+        <p>습관 도장 (印) • 다른 사용자는 내 기록을 볼 수 없어요 • 문의 yglee0321@gmail.com</p>
       </footer>
 
       <HabitModal

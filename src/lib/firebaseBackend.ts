@@ -11,10 +11,11 @@ import {
   browserLocalPersistence,
   browserSessionPersistence,
   reauthenticateWithPopup,
+  deleteUser,
 } from 'firebase/auth';
-import { initializeFirestore, memoryLocalCache, collection, doc, setDoc, deleteDoc, onSnapshot, Unsubscribe } from 'firebase/firestore';
+import { initializeFirestore, memoryLocalCache, collection, doc, setDoc, deleteDoc, getDocs, onSnapshot, Unsubscribe } from 'firebase/firestore';
 import config from '../../firebase-config.json';
-import { applySnapshot, attachBackend, setBackendError, setAuth, resetData, startLoadTimer, waitForWrites } from './cloud';
+import { applySnapshot, attachBackend, setBackendError, setAuth, setNotice, resetData, startLoadTimer, waitForWrites } from './cloud';
 
 const app = initializeApp(config);
 const auth = getAuth(app);
@@ -36,7 +37,8 @@ export function startFirebase() {
       setAuth('signedOut');
       return;
     }
-    setAuth('signedIn', { name: user.displayName || '', email: user.email || '', photo: user.photoURL || undefined });
+    // 프로필 사진은 쓰지 않음 (이름 첫 글자로 표시)
+    setAuth('signedIn', { name: user.displayName || '', email: user.email || '' });
     const col = collection(db, 'users', user.uid, 'data');
     attachBackend(
       {
@@ -60,6 +62,11 @@ export function startFirebase() {
       (err) => {
         console.warn(err);
         const code = (err as any)?.code || 'unknown';
+        if (code === 'permission-denied') {
+          // 허용 명단에 없는 계정
+          setAuth('notInvited', { name: user.displayName || '', email: user.email || '' });
+          return;
+        }
         const hint =
           code === 'permission-denied'
             ? '접근 권한이 없어요. (Firestore 보안 규칙 확인 필요)'
@@ -143,4 +150,43 @@ export async function uploadCsvAsSheet(title: string, csv: string): Promise<{ ok
   } catch (e: any) {
     return { ok: false, message: `구글 드라이브에 연결하지 못했어요. 다른 네트워크에서 다시 해 보세요. [${String(e?.message || 'network').slice(0, 60)}]` };
   }
+}
+
+// 탈퇴: 구글로 다시 로그인해 본인 확인 → 기록 전부 삭제 → 로그인 계정 삭제
+export type DeleteStep = 'reauth' | 'data' | 'account' | 'done';
+export async function deleteMyAccount(onStep?: (s: DeleteStep) => void): Promise<{ ok: true } | { ok: false; message: string; step: DeleteStep }> {
+  const user = auth.currentUser;
+  if (!user) return { ok: false, message: '로그인이 필요해요.', step: 'reauth' };
+  try {
+    onStep?.('reauth');
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ login_hint: user.email || '' });
+    await reauthenticateWithPopup(user, provider);
+  } catch (e: any) {
+    const tag = e?.code ? ` [${e.code}]` : '';
+    if (e?.code === 'auth/user-mismatch') return { ok: false, message: '같은 구글 계정으로 다시 로그인해 주세요.' + tag, step: 'reauth' };
+    return { ok: false, message: '본인 확인이 끝나지 않아 탈퇴하지 않았어요.' + tag, step: 'reauth' };
+  }
+  try {
+    onStep?.('data');
+    await waitForWrites();
+    if (unsubData) {
+      unsubData();
+      unsubData = null;
+    }
+    const col = collection(db, 'users', user.uid, 'data');
+    const snap = await getDocs(col);
+    for (const d of snap.docs) await deleteDoc(d.ref);
+  } catch (e: any) {
+    return { ok: false, message: `기록을 지우는 중 문제가 생겼어요. 일부 기록이 남아 있을 수 있어요. [${e?.code || 'unknown'}]`, step: 'data' };
+  }
+  try {
+    onStep?.('account');
+    await deleteUser(user);
+  } catch (e: any) {
+    return { ok: false, message: `기록은 모두 지웠지만 로그인 계정 삭제에 실패했어요. 다시 시도해 주세요. [${e?.code || 'unknown'}]`, step: 'account' };
+  }
+  onStep?.('done');
+  setNotice('탈퇴가 끝났어요. 기록과 로그인 계정을 모두 지웠어요.');
+  return { ok: true };
 }

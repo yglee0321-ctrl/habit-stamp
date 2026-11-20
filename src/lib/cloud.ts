@@ -24,8 +24,9 @@ interface State {
   logs: Map<string, HabitLog>; // key = `${date}_${habitId}`
   settings: Settings;
   uid: string | null;
-  auth: 'unknown' | 'signedOut' | 'signedIn';
-  account?: { name: string; email: string; photo?: string };
+  auth: 'unknown' | 'signedOut' | 'signedIn' | 'notInvited';
+  account?: { name: string; email: string };
+  notice?: string;
 }
 
 const state: State = {
@@ -192,6 +193,11 @@ export function resetData() {
   state.status = 'loading';
   inflight.clear();
   dirty.clear();
+  emit();
+}
+
+export function setNotice(msg?: string) {
+  state.notice = msg;
   emit();
 }
 

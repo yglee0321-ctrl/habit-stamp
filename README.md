@@ -4,6 +4,8 @@
 
 - 구글 계정 로그인 (Firebase Authentication)
 - 기록은 `users/<본인 uid>/data/` 에만 저장, `firestore.rules` 로 본인만 읽고 쓰기
+- 초대한 사람만 사용: Firestore `config/allowlist` 문서의 `emails` 배열에 있는 이메일만 기록을 읽고 쓸 수 있음 (운영자가 콘솔에서 추가)
+- 탈퇴: 구글 재로그인으로 본인 확인 후 기록과 로그인 계정 삭제
 - 휴대폰 홈 화면에 추가해 앱처럼 사용 (PWA)
 - 구글 시트로 내보내기 (drive.file 권한: 이 앱이 만든 파일에만 접근)
 
@@ -16,6 +18,10 @@ npm run build:claude  # Claude 아티팩트용 HTML 한 장 → dist/index.html
 ```
 
 `firebase-config.json` 에 Firebase 웹 앱 설정값을 넣어야 합니다. (이 값은 공개되어도 괜찮고, 데이터 보호는 보안 규칙이 맡습니다.)
+
+## 보안 규칙 적용
+
+`firestore.rules`는 자동으로 올라가지 않습니다. Firebase 콘솔 → Firestore → 규칙 탭에 붙여넣고 게시하세요. 그 전에 `config/allowlist` 문서를 먼저 만들어야 합니다.
 
 ## 배포
 

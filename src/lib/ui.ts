@@ -15,13 +15,20 @@ export function askConfirm(message: string, okLabel = '확인'): Promise<boolean
       const b = document.createElement('button');
       b.textContent = label;
       b.style.cssText = `padding:8px 16px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid ${primary ? '#C23B22' : dark ? '#38332C' : '#E2DBD0'};background:${primary ? '#C23B22' : 'transparent'};color:${primary ? '#fff' : 'inherit'}`;
-      b.onclick = () => { wrap.remove(); resolve(val); };
+      b.onclick = () => close(val);
       return b;
     };
     row.append(mk('취소', false, false), mk(okLabel, true, true));
     box.append(p, row);
     wrap.append(box);
-    wrap.onclick = (e) => { if (e.target === wrap) { wrap.remove(); resolve(false); } };
+    const prev = document.activeElement as HTMLElement | null;
+    const close = (v: boolean) => { wrap.remove(); document.removeEventListener('keydown', onKey); prev?.focus?.(); resolve(v); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close(false); };
+    document.addEventListener('keydown', onKey);
+    wrap.setAttribute('role', 'alertdialog');
+    wrap.setAttribute('aria-modal', 'true');
+    wrap.onclick = (e) => { if (e.target === wrap) close(false); };
     document.body.append(wrap);
+    (row.lastElementChild as HTMLElement | null)?.focus();
   });
 }

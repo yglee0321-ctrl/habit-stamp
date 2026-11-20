@@ -37,11 +37,11 @@ const RATE_W = 46;
 // 하루 달성률 → 주황색 진하기 (불투명 색만 사용: 고정 열 뒤가 비치지 않게)
 function rateBg(rate: number | null) {
   if (rate === null) return 'bg-[#FCFAF6] dark:bg-[#1A1816]';
-  if (rate >= 100) return 'bg-orange-500 text-white';
-  if (rate >= 75) return 'bg-orange-400 text-[#3A1D08] dark:bg-orange-600 dark:text-white';
+  if (rate >= 100) return 'bg-orange-500 text-[#2A1405]';
+  if (rate >= 75) return 'bg-orange-400 text-[#3A1D08] dark:bg-orange-600 dark:text-[#2A1405]';
   if (rate >= 50) return 'bg-orange-300 text-[#3A1D08] dark:bg-orange-700 dark:text-orange-50';
   if (rate > 0) return 'bg-orange-200 text-[#3A1D08] dark:bg-orange-900 dark:text-orange-100';
-  return 'bg-[#EFEBE3] text-[#8A8174] dark:bg-[#25221F]';
+  return 'bg-[#EFEBE3] text-[#6E665A] dark:bg-[#25221F] dark:text-[#A89F91]';
 }
 
 export const SheetView: React.FC<SheetViewProps> = ({ habits, logs, currentDate, onOpenCreateHabit, onEditHabit }) => {
@@ -208,8 +208,10 @@ export const SheetView: React.FC<SheetViewProps> = ({ habits, logs, currentDate,
     if (el) el.scrollBy({ left: dir * Math.max(200, (el.clientWidth - DATE_W - RATE_W) * 0.8), behavior: 'smooth' });
   };
 
+  const lastCellRef = useRef<HTMLElement | null>(null);
   const handleCellClick = (habit: Habit, ds: string) => {
     if (orderMode) return;
+    lastCellRef.current = document.activeElement as HTMLElement | null;
     if (!quickMode || habit.trackOnly) {
       setEditing({ habit, date: ds });
       return;
@@ -258,11 +260,11 @@ export const SheetView: React.FC<SheetViewProps> = ({ habits, logs, currentDate,
       <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-0.5 bg-[#F3EFE6] dark:bg-[#25221F] p-1 rounded-2xl border border-[#E2DBD0] dark:border-[#38332C]">
-            <button onClick={goPrev} className="p-2 rounded-xl text-[#5C5549] dark:text-[#C5BEB3] hover:bg-white dark:hover:bg-[#1A1816]" title="이전">
+            <button onClick={goPrev} className="p-2 rounded-xl text-[#5C5549] dark:text-[#C5BEB3] hover:bg-white dark:hover:bg-[#1A1816]" title="이전" aria-label="이전 기간">
               <ChevronLeft className="w-4 h-4" />
             </button>
             <span className="px-1 text-sm font-bold font-batang text-[#2C2723] dark:text-[#E6E1DA] min-w-[92px] text-center whitespace-nowrap">{rangeLabel}</span>
-            <button onClick={goNext} className="p-2 rounded-xl text-[#5C5549] dark:text-[#C5BEB3] hover:bg-white dark:hover:bg-[#1A1816]" title="다음">
+            <button onClick={goNext} className="p-2 rounded-xl text-[#5C5549] dark:text-[#C5BEB3] hover:bg-white dark:hover:bg-[#1A1816]" title="다음" aria-label="다음 기간">
               <ChevronRight className="w-4 h-4" />
             </button>
             {!isCurrentRange && (
@@ -301,12 +303,12 @@ export const SheetView: React.FC<SheetViewProps> = ({ habits, logs, currentDate,
           <button
             onClick={() => setExportOpen(true)}
             className="px-3 py-2.5 rounded-xl text-xs font-bold border border-[#E2DBD0] dark:border-[#38332C] text-[#5C5549] dark:text-[#C5BEB3] hover:bg-[#F3EFE6] dark:hover:bg-[#25221F] flex items-center gap-1"
-            title="구글 시트로 내보내기"
+            title="구글 시트로 내보내기" aria-label="구글 시트로 내보내기"
           >
             <Share2 className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">내보내기</span>
           </button>
-          <button onClick={onOpenCreateHabit} className="px-3 py-2.5 rounded-xl bg-[#C23B22] hover:bg-[#A82E18] text-white text-xs font-bold flex items-center gap-1" title="항목 추가">
+          <button onClick={onOpenCreateHabit} className="px-3 py-2.5 rounded-xl bg-[#C23B22] hover:bg-[#A82E18] text-white text-xs font-bold flex items-center gap-1" title="항목 추가" aria-label="항목 추가">
             <Plus className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">항목</span>
           </button>
@@ -337,7 +339,7 @@ export const SheetView: React.FC<SheetViewProps> = ({ habits, logs, currentDate,
             onClick={() => scrollCols(-1)}
             className="absolute top-1.5 z-40 w-7 h-7 rounded-full bg-[#2C2723]/75 hover:bg-[#2C2723] text-white flex items-center justify-center shadow"
             style={{ left: DATE_W + RATE_W + 6 }}
-            title="왼쪽 항목 보기"
+            title="왼쪽 항목 보기" aria-label="왼쪽 항목 보기"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -346,7 +348,7 @@ export const SheetView: React.FC<SheetViewProps> = ({ habits, logs, currentDate,
           <button
             onClick={() => scrollCols(1)}
             className="absolute right-1.5 top-1.5 z-40 w-7 h-7 rounded-full bg-[#2C2723]/75 hover:bg-[#2C2723] text-white flex items-center justify-center shadow"
-            title="오른쪽 항목 보기"
+            title="오른쪽 항목 보기" aria-label="오른쪽 항목 보기"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -408,11 +410,11 @@ export const SheetView: React.FC<SheetViewProps> = ({ habits, logs, currentDate,
                   >
                     {orderMode && (
                       <div className="flex items-center justify-between mb-1 text-[#8A8174]">
-                        <button onClick={() => shiftHabit(h.id, -1)} className="w-6 h-6 rounded-md hover:bg-white dark:hover:bg-[#1A1816] flex items-center justify-center" title="왼쪽으로">
+                        <button onClick={() => shiftHabit(h.id, -1)} className="w-6 h-6 rounded-md hover:bg-white dark:hover:bg-[#1A1816] flex items-center justify-center" title="왼쪽으로" aria-label="왼쪽으로 옮기기">
                           <ChevronLeft className="w-4 h-4" />
                         </button>
                         <GripVertical className="w-3.5 h-3.5" />
-                        <button onClick={() => shiftHabit(h.id, 1)} className="w-6 h-6 rounded-md hover:bg-white dark:hover:bg-[#1A1816] flex items-center justify-center" title="오른쪽으로">
+                        <button onClick={() => shiftHabit(h.id, 1)} className="w-6 h-6 rounded-md hover:bg-white dark:hover:bg-[#1A1816] flex items-center justify-center" title="오른쪽으로" aria-label="오른쪽으로 옮기기">
                           <ChevronRight className="w-4 h-4" />
                         </button>
                       </div>
@@ -442,11 +444,11 @@ export const SheetView: React.FC<SheetViewProps> = ({ habits, logs, currentDate,
                   ? 'bg-[#C23B22] text-white'
                   : `bg-[#FCFAF6] dark:bg-[#1A1816] ${
                       future
-                        ? 'text-[#B8AF9F] dark:text-[#5C5549]'
+                        ? 'text-[#7A7265] dark:text-[#8A8174] font-normal'
                         : dow === 0
-                        ? 'text-[#C23B22]'
+                        ? 'text-[#C23B22] dark:text-[#F07A63]'
                         : dow === 6
-                        ? 'text-sky-600 dark:text-sky-400'
+                        ? 'text-sky-700 dark:text-sky-400'
                         : 'text-[#2C2723] dark:text-[#E6E1DA]'
                     }`;
                 return (
@@ -469,7 +471,7 @@ export const SheetView: React.FC<SheetViewProps> = ({ habits, logs, currentDate,
                       const partial = !h.trackOnly && !done && (log?.currentCount || 0) > 0;
                       const written = !!h.trackOnly && !!log?.notes; // 기록만 항목: 글을 적은 날은 달성처럼 칠함
                       const bg = done || written
-                        ? 'bg-orange-400 dark:bg-orange-600 text-[#3A1D08] dark:text-white'
+                        ? 'bg-orange-400 dark:bg-orange-600 text-[#3A1D08] dark:text-[#2A1405]'
                         : partial
                         ? 'bg-orange-200 dark:bg-orange-900 text-[#3A1D08] dark:text-orange-100'
                         : !scheduled && !h.trackOnly
@@ -483,7 +485,18 @@ export const SheetView: React.FC<SheetViewProps> = ({ habits, logs, currentDate,
                         <td
                           key={h.id}
                           onClick={() => handleCellClick(h, ds)}
-                          className={`border-r ${line} ${rowLine} px-1.5 align-middle cursor-pointer hover:shadow-[inset_0_0_0_2px_rgba(194,59,34,.45)] ${bg}`}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              handleCellClick(h, ds);
+                            }
+                          }}
+                          tabIndex={0}
+                          role="button"
+                          aria-label={`${format(d, 'M월 d일', { locale: ko })} ${h.title}: ${
+                            h.trackOnly ? (log?.notes ? '기록 있음' : '기록 없음') : done ? '달성' : partial ? `${log!.currentCount}/${target}회` : '비달성'
+                          }${log?.notes ? `, 메모 ${log.notes}` : ''}`}
+                          className={`border-r ${line} ${rowLine} px-1.5 align-middle cursor-pointer hover:shadow-[inset_0_0_0_2px_rgba(194,59,34,.45)] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-[#1D4ED8] focus-visible:-outline-offset-[3px] ${bg}`}
                           title={log?.notes || undefined}
                         >
                           <div
@@ -491,6 +504,11 @@ export const SheetView: React.FC<SheetViewProps> = ({ habits, logs, currentDate,
                               isWeek ? 'min-h-[64px] text-[12px]' : 'h-[28px] text-[11px]'
                             }`}
                           >
+                            {done && (
+                              <span className="font-black shrink-0" aria-hidden="true">
+                                ✓
+                              </span>
+                            )}
                             {done && log?.subitem && <span className="font-bold shrink-0">{log.subitem}</span>}
                             {partial && <span className="font-bold shrink-0">{log!.currentCount}/{target}</span>}
                             {log?.notes && (
@@ -553,13 +571,34 @@ export const SheetView: React.FC<SheetViewProps> = ({ habits, logs, currentDate,
             habit={editing.habit}
             date={editing.date}
             log={logMap.get(`${editing.date}_${editing.habit.id}`)}
-            onClose={() => setEditing(null)}
+            onClose={() => {
+              setEditing(null);
+              setTimeout(() => lastCellRef.current?.focus?.(), 0);
+            }}
           />
         )}
       </AnimatePresence>
     </div>
   );
 };
+
+// 대화상자: Escape로 닫기, 닫으면 원래 칸으로 포커스 복귀
+function useDialogKeys(onClose: () => void) {
+  useEffect(() => {
+    const prev = document.activeElement as HTMLElement | null;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      setTimeout(() => prev?.focus?.(), 0);
+    };
+  }, []);
+}
 
 const CellEditor: React.FC<{
   habit: Habit;
@@ -574,6 +613,7 @@ const CellEditor: React.FC<{
   const subs = habit.subcategories || [];
   const [sub, setSub] = useState<string | undefined>(log?.subitem || subs[0]);
   const d = new Date(date + 'T00:00:00');
+  useDialogKeys(onClose);
 
   const save = () => {
     if (habit.trackOnly) setCellRecord(habit, date, 'none', notes);
@@ -610,6 +650,8 @@ const CellEditor: React.FC<{
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 40, opacity: 0 }}
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
         className="w-full sm:max-w-md bg-[#FCFAF6] dark:bg-[#1A1816] border border-[#E8E2D5] dark:border-[#2C2824] rounded-t-3xl sm:rounded-3xl p-5 font-serif-kr shadow-2xl"
       >
         <div className="flex items-start justify-between mb-4">
@@ -617,7 +659,7 @@ const CellEditor: React.FC<{
             <div className="text-[11px] text-[#8A8174]">{format(d, 'M월 d일 (EEE)', { locale: ko })}</div>
             <div className="text-base font-bold font-batang text-[#2C2723] dark:text-[#E6E1DA]">{habit.title}</div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-[#8A8174] hover:bg-[#F3EFE6] dark:hover:bg-[#25221F]">
+          <button onClick={onClose} aria-label="닫기" className="p-1.5 rounded-lg text-[#6E665A] dark:text-[#A89F91] hover:bg-[#F3EFE6] dark:hover:bg-[#25221F]">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -710,6 +752,7 @@ const ExportModal: React.FC<{
   const [result, setResult] = useState<ExportResult | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const today = startOfDay(new Date());
+  useDialogKeys(onClose);
 
   const getRows = () => {
     const start = scope === 'all' ? allStart : rangeStart;
@@ -759,6 +802,8 @@ const ExportModal: React.FC<{
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 40, opacity: 0 }}
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
         className="w-full sm:max-w-md bg-[#FCFAF6] dark:bg-[#1A1816] border border-[#E8E2D5] dark:border-[#2C2824] rounded-t-3xl sm:rounded-3xl p-5 font-serif-kr shadow-2xl"
       >
         <div className="flex items-start justify-between mb-4">
@@ -766,7 +811,7 @@ const ExportModal: React.FC<{
             <div className="text-base font-bold font-batang text-[#2C2723] dark:text-[#E6E1DA]">구글 시트로 내보내기</div>
             <div className="text-[11px] text-[#8A8174] mt-0.5">날짜별로 달성(O)과 적어 둔 글이 한 칸에 들어가요</div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-[#8A8174] hover:bg-[#F3EFE6] dark:hover:bg-[#25221F]">
+          <button onClick={onClose} aria-label="닫기" className="p-1.5 rounded-lg text-[#6E665A] dark:text-[#A89F91] hover:bg-[#F3EFE6] dark:hover:bg-[#25221F]">
             <X className="w-4 h-4" />
           </button>
         </div>
